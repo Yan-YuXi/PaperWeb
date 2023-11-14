@@ -8,7 +8,7 @@ from paper.models import *
 from django.http import JsonResponse, FileResponse, StreamingHttpResponse
 from django.core import serializers
 from django.db.models import Q
-from django.core.paginator import Paginator
+# from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -19,27 +19,49 @@ def get_paper(request):
     try:
         title = request.GET.get('title')
         type = request.GET.get('type')
+        isequal = request.GET.get('isequal')
         req_key = title.split(';')
         q = Q()
-        if type == 'author':
-            for item in req_key:
-                q.children.append(('paper_author__icontains', item))
-        elif type == 'source':
-            if len(req_key) != 1:
-                raise Exception('输入查询条件过多，请减少查询条件')
-            q.children.append(('paper_source__source_name', req_key[0]))
-        elif type == 'keywords':
-            for item in req_key:
-                q.children.append(('paper_keywords__icontains', item))
-        elif type == 'abstract':
-            for item in req_key:
-                q.children.append(('paper_abstract__icontains', item))
-        elif type == 'title':
-            for item in req_key:
-                q.children.append(('paper_title__icontains', item))
-        else:
-            raise Exception('查询类型选择错误')
+        if isequal == '0':
+            if type == 'author':
+                for item in req_key:
+                    q.children.append(('paper_author__iexact', item))
+            elif type == 'source':
+                if len(req_key) != 1:
+                    raise Exception('输入查询条件过多，请减少查询条件')
+                # print(req_key[0])
+                q.children.append(('paper_source__source_name__iexact', req_key[0]))
+            elif type == 'keywords':
+                for item in req_key:
+                    q.children.append(('paper_keywords__iexact', item))
+            elif type == 'abstract':
+                for item in req_key:
+                    q.children.append(('paper_abstract__iexact', item))
+            elif type == 'title':
+                for item in req_key:
+                    q.children.append(('paper_title__iexact', item))
+            else:
+                raise Exception('查询类型选择错误')
 
+        else:
+            if type == 'author':
+                for item in req_key:
+                    q.children.append(('paper_author__icontains', item))
+            elif type == 'source':
+                if len(req_key) != 1:
+                    raise Exception('输入查询条件过多，请减少查询条件')
+                q.children.append(('paper_source__source_name__icontains', req_key[0]))
+            elif type == 'keywords':
+                for item in req_key:
+                    q.children.append(('paper_keywords__icontains', item))
+            elif type == 'abstract':
+                for item in req_key:
+                    q.children.append(('paper_abstract__icontains', item))
+            elif type == 'title':
+                for item in req_key:
+                    q.children.append(('paper_title__icontains', item))
+            else:
+                raise Exception('查询类型选择错误')
         papers = PaperMainInfoModel.objects.filter(q).filter(data_status=True)
         # print(papers)
         res = {
@@ -204,23 +226,23 @@ def download_file(request):
         file_path = PaperFilePathModel.objects.get(paper_id=pk).file_path
         path = str(file_path)
 
-        print("文件路径：", path)
-        res = FileResponse(open(path, 'rb'))
-        res['content_type'] = 'application/octet-stream'
-        res['Content-Disposition'] = "attachment; filename={}.txt".format(pk)
-
-
         paper_download = PaperDownloadCountModel.objects.get(paper_id=pk)
         print("文件下载次数：", paper_download.download_count)
         paper_download.download_count = paper_download.download_count + 1
         paper_download.save()
 
-
-
-        # res['Content-Disposition'] = f'attachment; filename="{pk}.pdf"'
-        # res['Access-Control-Expose-Headers'] = "Content-Disposition, Content-Type"
-
-        return res
+        return JsonResponse({
+            'status': True,
+            'data': {
+                'filename': str(pk) + '.pdf',
+                'filepath': path
+            },
+            'msg': '获取成功'
+        })
     except Exception as e:
-        print("错误")
-        return HttpResponse("出现错误：", str(e))
+        return JsonResponse({
+            'status': True,
+            'data': {},
+            'msg': str(e)
+        })
+

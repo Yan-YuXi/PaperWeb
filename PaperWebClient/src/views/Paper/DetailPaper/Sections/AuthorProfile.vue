@@ -2,7 +2,6 @@
 import { onMounted, getCurrentInstance, ref } from "vue";
 
 //Vue Material Kit 2 components
-import MaterialAvatar from "@/components/MaterialAvatar.vue";
 import MaterialButton from "@/components/MaterialButton.vue";
 
 // image
@@ -37,23 +36,53 @@ async function download_file() {
       pk: data.value.pk
     }
   })
-
-  console.log(res)
+  // console.log(res)
   if(res.status === 200) {
-    let blob = new Blob([res.data], { type: "application/octet-stream" });
-
-    let url = window.URL.createObjectURL(blob)
-
-    let link = document.createElement("a")
-    link.href = url
-    link.download = String(data.value.pk) + ".pdf"
-    link.click()
-
-    // 释放URL 对象，避免内存溢出
-    window.URL.revokeObjectURL(url)
+    if(res.data.status === true) {
+      proxy.$store.commit("setPaperPath", {
+        'path': res.data.data.filepath,
+        'name': res.data.data.filename
+      })
+    proxy.$router.push('pdf')
+    }
+    else {
+      alert(res.data.msg)
+    }
   }
   else {
     alert("下载出现错误")
+  }
+}
+
+async function handleSource() {
+  const res = await proxy.$http.get('get_paper', {
+    params: {
+      type: "source",
+      title: data.value.source,
+      isequal: "0"
+    }
+  })
+  console.log(res)
+  if(res.status === 200) {
+    if(res.data.status === true) {
+      // console.log(res.data)
+      // paper_list.value = res.data.main_data
+      let obj = {
+        "val": res.data.main_data,
+        "input": data.value.source,
+        "select": "source",
+        "isequal": "0"
+      }
+      // console.log(typeof res.data.main_data)
+      proxy.$store.commit('setPaper', obj)
+      proxy.$router.push('show_paper')
+    }
+    else {
+      alert(res.data.msg)
+    }
+  }
+  else {
+    alert("请求数据或服务器错误")
   }
 }
 </script>
@@ -80,7 +109,7 @@ async function download_file() {
               <div
                 class="d-flex justify-content-between align-items-center mb-2"
               >
-                <h3 class="mb-0">{{ data.title }}</h3>
+                <h4 class="mb-0" style="text-align: justify; font-family: 'Microsoft YaHei'">{{ data.title }}</h4>
                 <div class="d-block">
                   <MaterialButton
                     class="text-nowrap mb-0"
@@ -110,7 +139,7 @@ async function download_file() {
               <div class="row mb-4 div-style">
                 <div class="col-auto">
                   <span>来源: </span>
-                  <span class="h6 me-1">{{ data.source }}</span>
+                  <span class="h6 me-1 source-style" @click="handleSource">{{ data.source }}</span>
                 </div>
               </div>
               <div class="row mb-4 div-style">
@@ -122,15 +151,6 @@ async function download_file() {
                     <p v-else>暂无此论文摘要数据</p>
                   </span>
                 </div>
-                <!--                <div class="col-auto">-->
-                <!--                  <span>Issue:</span>-->
-                <!--                  -->
-
-                <!--                </div>-->
-                <!--                <div class="col-auto">-->
-                <!--                  <span>Pages:</span>-->
-                <!--                  <span class="h6 me-1">260</span>-->
-                <!--                </div>-->
               </div>
 <!--              <p class="text-lg mb-0">-->
 <!--                Decisions: If you can’t decide, the answer is no. If two equally-->
@@ -150,7 +170,7 @@ async function download_file() {
               <div class="row mb-4 div-style">
                 <div class="col-auto">
                   <span>关键词: </span>
-                  <span class="h6 me-1" v-for="keyword in data.keysords">{{ keyword }}</span>
+                  <span class="h6 me-1" v-for="keyword in data.keywords">{{ keyword }}; </span>
 <!--                  <span class="h6 me-1">3.5k; </span>-->
 <!--                  <span class="h6 me-1">3.5k; </span>-->
                 </div>
@@ -203,7 +223,7 @@ async function download_file() {
 <!--                </div>-->
               </div>
               <h6>
-                <a v-if="data.doi" :href="`https://dx.doi.org/${data.doi}`" target="_blank">点击查看原文</a>
+                <a v-if="data.doi" :href="`https://dx.doi.org/${data.doi}`" target="_blank">点击查看原链接</a>
               </h6>
             </div>
           </div>
@@ -220,5 +240,17 @@ async function download_file() {
 .img-no-margin {
   height: 15px;
   margin-right: 0;
+}
+.source-style {
+
+}
+.source-style:hover {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: grey;
+  //color: grey;
+}
+.col-lg-7 {
+  width: 70% !important;
 }
 </style>

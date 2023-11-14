@@ -26,9 +26,10 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import GetPaper from "@/views/Paper/GetPaper.vue";
 import ContactUs from "@/views/Paper/ConnectUs/ContactUs.vue";
-import ShowPaper from "@/views/Paper/ShowPaper/ShowPaper.vue";
+import ShowPaper from "@/views/Paper/ShowPaper/ShowPaper2.vue";
 import DetailPaper from "@/views/Paper/DetailPaper/DetailPaper.vue";
 import NotFound from "@/views/Paper/NotFound/NotFound.vue";
+import PDF from "@/views/Paper/PDF.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,6 +57,11 @@ const router = createRouter({
       path: "/contact_us",
       name: "contact_us",
       component: ContactUs,
+    },
+    {
+      path: "/pdf",
+      name: "pdf",
+      component: PDF,
     },
     {
       path: "/404",

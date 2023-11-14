@@ -3,20 +3,20 @@ import DefaultCounterCard from "../../../examples/cards/counterCards/DefaultCoun
 import { ref } from "vue";
 import { onBeforeMount, getCurrentInstance } from "vue";
 
-const paper_count = ref(0)
-const paper_recount = ref(0)
+const paper_count = ref(231000)
+const paper_recount = ref(1000)
 const { proxy }  = getCurrentInstance()
-onBeforeMount(() => {
-  get_count()
-})
+// onBeforeMount(() => {
+//   get_count()
+// })
 
-async function get_count() {
-  const res = await proxy.$http.get('get_paper_count')
-  // console.log(res.data[0].count)
-  paper_count.value = res.data[0].count
-  paper_recount.value = res.data[0].recount
-  // console.log(paper_recount.value)
-}
+// async function get_count() {
+//   const res = await proxy.$http.get('get_paper_count')
+//   // console.log(res.data[0].count)
+//   paper_count.value = res.data[0].count
+//   paper_recount.value = res.data[0].recount
+//   // console.log(paper_recount.value)
+// }
 // const TotalPaper = ref(0);
 </script>
 

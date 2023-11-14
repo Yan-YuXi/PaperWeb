@@ -6,7 +6,10 @@ const store = createStore({
             PaperList: [],
             title: '',
             type: '',
-            PaperInfo: {}
+            PaperInfo: {},
+            paperPath: '',
+            fileName: '',
+            isEqual: ''
         }
     },
     mutations: {
@@ -14,9 +17,14 @@ const store = createStore({
             state.PaperList = data["val"]
             state.title = data["input"]
             state.type = data["select"]
+            state.isEqual = data["isequal"]
         },
         setPaperInfo(state,data) {
             state.PaperInfo = data
+        },
+        setPaperPath(state, data) {
+            state.paperPath = data['path']
+            state.fileName = data['name']
         }
     },
     getters: {
